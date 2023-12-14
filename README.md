@@ -9,7 +9,7 @@ Pada final project strukdat kami membuat suatu program yang berfungsi untuk menc
 ### Penjelasan Program
 Dalam program ini, kami menggunakan representasi graf berbasis matriks untuk menyelesaikan masalah pencarian rute tercepat di antara beberapa titik lokasi. kami menggunakan konsep algoritma Dijkstra. Algoritma ini berfungsi untuk mencari rute tercepat antara titik awal dan titik tujuan di dalam graf yang ditentukan. Algoritma Dijkstra menggunakan teknik pemrograman yang disebut "Priority Queue" untuk menentukan urutan penjelajahan node yang ada di graf.
 
-add gambar here
+![map visual](https://github.com/NaufanZaki/Final-Project-Strukdat/blob/main/petanya.jpg)
 
 Gambar diatas adalah visualisasi peta lokasi yang kami gunakan untuk menggambarkan bagaimana graf yang dibuat dalam program. Peta tersebut memiliki 10 titik dimana masing-masing titik terhubung dengan lainnya. Berikut merupakan bagaimana program tersebut berjalan:
 
