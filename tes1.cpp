@@ -2,7 +2,7 @@
 #include <vector>
 #include <algorithm> // for transform function
 #include <limits>    // for clear buffer
-
+#include <climits>
 using namespace std;
 
 // Kelas Abstract Node
@@ -119,7 +119,7 @@ public:
             if (!path.empty()) {
                 cout << "Rute dari " << lokasiAwal << " ke " << lokasiTujuan << ": ";
                 for (int i : path) {
-                    cout << nodes[i]->getName() << " ";
+                    cout << nodes[i]->getName() << " >> ";
                 }
                 cout << endl;
 
@@ -199,15 +199,15 @@ int main() {
 
     // Menambahkan sisi yang merepresentasikan hubungan antar lokasi
     transportasiUmum.addEdge(0, 1);  // ITS - UNAIR
+    transportasiUmum.addEdge(0, 6);  // ITS - JODER
     transportasiUmum.addEdge(1, 2);  // UNAIR - GALAXY MALL
+    transportasiUmum.addEdge(1, 9);  // UNAIR - SUTOMO
     transportasiUmum.addEdge(2, 3);  // GALAXY MALL - TUNJUNGAN PLAZA
     transportasiUmum.addEdge(3, 4);  // TUNJUNGAN PLAZA - GWALK
-    transportasiUmum.addEdge(4, 5);  // GWALK - UNNESA
-    transportasiUmum.addEdge(0, 6);  // ITS - JODER
-    transportasiUmum.addEdge(6, 2);  // JODER - GALAXY MALL
     transportasiUmum.addEdge(3, 7);  // TUNJUNGAN PLAZA - SURAMADU
+    transportasiUmum.addEdge(4, 5);  // GWALK - UNNESA   
+    transportasiUmum.addEdge(6, 2);  // JODER - GALAXY MALL
     transportasiUmum.addEdge(7, 8);  // SURAMADU - BEBEK SINJAY
-    transportasiUmum.addEdge(1, 9);  // UNAIR - SUTOMO
     transportasiUmum.addEdge(9, 7);  // SUTOMO - SURAMADU
 
     // Menampilkan representasi matriks ketetanggaan graf
