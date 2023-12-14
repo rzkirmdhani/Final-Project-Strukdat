@@ -1,10 +1,11 @@
 #include <iostream>
 #include <vector>
 #include <algorithm> // for transform function
+#include <limits>    // for clear buffer
 
 using namespace std;
 
-// Abstract Class Node
+// Kelas Abstract Node
 class Node {
 public:
     Node(const string& nodeName) : name(nodeName) {}
@@ -18,7 +19,7 @@ protected:
     string name;
 };
 
-// Abstract Class Graph
+// Kelas Abstract Graph
 class Graph {
 public:
     virtual ~Graph() {}
@@ -28,7 +29,7 @@ public:
     virtual void display() const = 0;
 };
 
-// Concrete Class GraphAdjacencyMatrix implementing Graph
+// Kelas Concrete GraphAdjacencyMatrix yang mengimplementasikan Graph
 class GraphAdjacencyMatrix : public Graph {
 public:
     GraphAdjacencyMatrix(int size) : nodeCount(0), adjacencyMatrix(size, vector<int>(size, 0)) {}
@@ -65,12 +66,29 @@ public:
         }
     }
 
+    // Fungsi untuk menemukan indeks node berdasarkan namanya (case-insensitive)
+    int findNodeIndex(const string& nodeName) {
+        string lowerNodeName = nodeName;
+        transform(lowerNodeName.begin(), lowerNodeName.end(), lowerNodeName.begin(), ::tolower);
+
+        for (int i = 0; i < nodeCount; ++i) {
+            string currentNodeName = nodes[i]->getName();
+            transform(currentNodeName.begin(), currentNodeName.end(), currentNodeName.begin(), ::tolower);
+
+            if (currentNodeName == lowerNodeName) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
 protected:
     int nodeCount;
     vector<Node*> nodes;
     vector<vector<int>> adjacencyMatrix;
 };
 
+// Kelas TransportationRoute untuk menampilkan rute
 class TransportationRoute {
 public:
     TransportationRoute(const string& start, const string& end) : startLocation(start), endLocation(end) {}
@@ -84,22 +102,21 @@ private:
     string endLocation;
 };
 
+// Kelas RuteTransportasiUmum yang merupakan turunan dari GraphAdjacencyMatrix
 class RuteTransportasiUmum : public GraphAdjacencyMatrix {
 public:
     RuteTransportasiUmum(int size) : GraphAdjacencyMatrix(size) {}
 
+    // Fungsi untuk menampilkan rute antara dua lokasi menggunakan algoritma Dijkstra
     void tampilkanRute(const string& lokasiAwal, const string& lokasiTujuan) {
         int indexAwal = findNodeIndex(lokasiAwal);
         int indexTujuan = findNodeIndex(lokasiTujuan);
 
         if (indexAwal != -1 && indexTujuan != -1) {
-            vector<int> visited(nodeCount, 0);
             vector<int> path;
-            bool found = false;
+            dijkstra(indexAwal, indexTujuan, path);
 
-            dfs(indexAwal, indexTujuan, visited, path, found);
-
-            if (found) {
+            if (!path.empty()) {
                 cout << "Rute dari " << lokasiAwal << " ke " << lokasiTujuan << ": ";
                 for (int i : path) {
                     cout << nodes[i]->getName() << " ";
@@ -117,84 +134,104 @@ public:
     }
 
 private:
-    void dfs(int currentNode, int targetNode, vector<int>& visited, vector<int>& path, bool& found) {
-        visited[currentNode] = 1;
-        path.push_back(currentNode);
+    // Fungsi untuk menjalankan algoritma Dijkstra untuk mencari jalur terpendek
+    void dijkstra(int startNode, int targetNode, vector<int>& path) {
+        vector<int> distance(nodeCount, INT_MAX);
+        vector<int> previous(nodeCount, -1);
+        vector<bool> visited(nodeCount, false);
 
-        if (currentNode == targetNode) {
-            found = true;
-            return;
-        }
+        distance[startNode] = 0;
 
-        for (int i = 0; i < nodeCount; ++i) {
-            if (adjacencyMatrix[currentNode][i] == 1 && !visited[i]) {
-                dfs(i, targetNode, visited, path, found);
-                if (found) {
-                    return;
+        for (int count = 0; count < nodeCount - 1; ++count) {
+            int minDistance = INT_MAX;
+            int minIndex = -1;
+
+            for (int i = 0; i < nodeCount; ++i) {
+                if (!visited[i] && distance[i] < minDistance) {
+                    minDistance = distance[i];
+                    minIndex = i;
+                }
+            }
+
+            if (minIndex == -1) {
+                break; // Tidak ada node yang dapat dicapai
+            }
+
+            visited[minIndex] = true;
+
+            for (int i = 0; i < nodeCount; ++i) {
+                if (!visited[i] && adjacencyMatrix[minIndex][i] && distance[minIndex] != INT_MAX &&
+                    distance[minIndex] + adjacencyMatrix[minIndex][i] < distance[i]) {
+                    distance[i] = distance[minIndex] + adjacencyMatrix[minIndex][i];
+                    previous[i] = minIndex;
                 }
             }
         }
 
-        path.pop_back();
+        reconstructPath(targetNode, previous, path);
     }
 
-    int findNodeIndex(const string& nodeName) {
-    // Convert the input and node names to lowercase for case-insensitive comparison
-    string lowerNodeName = nodeName;
-    transform(lowerNodeName.begin(), lowerNodeName.end(), lowerNodeName.begin(), ::tolower);
-
-    for (int i = 0; i < nodeCount; ++i) {
-        string currentNodeName = nodes[i]->getName();
-        transform(currentNodeName.begin(), currentNodeName.end(), currentNodeName.begin(), ::tolower);
-
-        cout << "Comparing: " << lowerNodeName << " with " << currentNodeName << endl;
-
-        if (currentNodeName == lowerNodeName) {
-            return i;
+    // Fungsi untuk merekonstruksi jalur terpendek dari algoritma Dijkstra
+    void reconstructPath(int targetNode, const vector<int>& previous, vector<int>& path) {
+        for (int at = targetNode; at != -1; at = previous[at]) {
+            path.push_back(at);
         }
-    }
-    return -1;
-}
 
+        reverse(path.begin(), path.end());
+    }
 };
 
 int main() {
+    // Membuat instance dari kelas RuteTransportasiUmum dengan kapasitas 10 node
     RuteTransportasiUmum transportasiUmum(10);
 
-    transportasiUmum.addNode(new Node("ITS")); //0
-    transportasiUmum.addNode(new Node("UNAIR")); //1
-    transportasiUmum.addNode(new Node("GALAXY MALL")); //2
-    transportasiUmum.addNode(new Node("TUNJUNGAN PLAZA")); //3
-    transportasiUmum.addNode(new Node("GWALK")); //4
-    transportasiUmum.addNode(new Node("UNNESA")); //5
-    transportasiUmum.addNode(new Node("JODER")); //6
-    transportasiUmum.addNode(new Node("SURAMADU")); //7
-    transportasiUmum.addNode(new Node("BEBEK SINJAY")); //8
-    transportasiUmum.addNode(new Node("RUMAH SAKIT SUTOMO")); //9
+    // Menambahkan node yang merepresentasikan lokasi ke dalam graf
+    transportasiUmum.addNode(new Node("ITS"));              //0
+    transportasiUmum.addNode(new Node("UNAIR"));            //1
+    transportasiUmum.addNode(new Node("GALAXY MALL"));      //2
+    transportasiUmum.addNode(new Node("TUNJUNGAN PLAZA"));  //3
+    transportasiUmum.addNode(new Node("GWALK"));            //4
+    transportasiUmum.addNode(new Node("UNNESA"));           //5
+    transportasiUmum.addNode(new Node("JODER"));            //6
+    transportasiUmum.addNode(new Node("SURAMADU"));         //7
+    transportasiUmum.addNode(new Node("BEBEK SINJAY"));     //8
+    transportasiUmum.addNode(new Node("RUMAH SAKIT SUTOMO"));//9
 
-    transportasiUmum.addEdge(0, 1); // ITS - UNAIR
-    transportasiUmum.addEdge(1, 2); // UNAIR - GALAXY MALL
-    transportasiUmum.addEdge(2, 3); // GALAXY MALL - TUNJUNGAN PLAZA
-    transportasiUmum.addEdge(3, 4); // TUNJUNGAN PLAZA - GWALK
-    transportasiUmum.addEdge(4, 5); // GWALK - UNNESA
-    transportasiUmum.addEdge(0, 6); // ITS - JODER
-    transportasiUmum.addEdge(6, 3); // JODER - GALAXY MALL
-    transportasiUmum.addEdge(3, 7); // TUNJUNGAN PLAZA - SURAMADU
-    transportasiUmum.addEdge(7, 8); // SURAMADU - BEBEK SINJAY
-    transportasiUmum.addEdge(1, 9); // UNAIR - SUTOMO
-    transportasiUmum.addEdge(9, 7); // SUTOMO SURAMADU
+    // Menambahkan sisi yang merepresentasikan hubungan antar lokasi
+    transportasiUmum.addEdge(0, 1);  // ITS - UNAIR
+    transportasiUmum.addEdge(1, 2);  // UNAIR - GALAXY MALL
+    transportasiUmum.addEdge(2, 3);  // GALAXY MALL - TUNJUNGAN PLAZA
+    transportasiUmum.addEdge(3, 4);  // TUNJUNGAN PLAZA - GWALK
+    transportasiUmum.addEdge(4, 5);  // GWALK - UNNESA
+    transportasiUmum.addEdge(0, 6);  // ITS - JODER
+    transportasiUmum.addEdge(6, 2);  // JODER - GALAXY MALL
+    transportasiUmum.addEdge(3, 7);  // TUNJUNGAN PLAZA - SURAMADU
+    transportasiUmum.addEdge(7, 8);  // SURAMADU - BEBEK SINJAY
+    transportasiUmum.addEdge(1, 9);  // UNAIR - SUTOMO
+    transportasiUmum.addEdge(9, 7);  // SUTOMO - SURAMADU
 
+    // Menampilkan representasi matriks ketetanggaan graf
     transportasiUmum.display();
+    
 
-    transportasiUmum.display();
+    // Membersihkan buffer input
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
+    // Meminta pengguna untuk memasukkan lokasi awal dan tujuan
     string lokasiAwal, lokasiTujuan;
     cout << "Masukkan lokasi awal: ";
     getline(cin, lokasiAwal);
 
+    // Membersihkan buffer input
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
     cout << "Masukkan lokasi tujuan: ";
     getline(cin, lokasiTujuan);
 
+    // Menampilkan garis pemisah
+    
+
+    // Menampilkan rute transportasi menggunakan algoritma Dijkstra
     transportasiUmum.tampilkanRute(lokasiAwal, lokasiTujuan);
 
     return 0;
