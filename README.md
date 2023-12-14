@@ -10,7 +10,7 @@ Pada final project strukdat kami membuat suatu program yang berfungsi untuk menc
 
 - Implementasi Class dan Method pada program tersebut dapat dilihat melalui class RuteTransportasiUmum. Class ini merupakan implementasi dari teori graf, yang didefinisikan melalui representasi matriks ketetanggaan atau adjacency list. Class ini memiliki beberapa property seperti array of pointer untuk menyimpan node, serta representasi matriks ketetanggaan dan adjacency list untuk menyimpan sisi graf.
 
-```
+```cpp
 class RuteTransportasiUmum {
     public:
         RuteTransportasiUmum(int n);
