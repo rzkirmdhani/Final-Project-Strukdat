@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
-#include <algorithm> // for transform function
-#include <limits>    // for clear buffer
+#include <algorithm>
+#include <limits> 
 #include <climits>
 using namespace std;
 
