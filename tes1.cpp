@@ -227,8 +227,6 @@ int main() {
 
     cout << "Masukkan lokasi tujuan: ";
     getline(cin, lokasiTujuan);
-
-    // Menampilkan garis pemisah
     
 
     // Menampilkan rute transportasi menggunakan algoritma Dijkstra
